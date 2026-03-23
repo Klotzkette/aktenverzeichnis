@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aktenverzeichnis</title>
+
+  <!-- SheetJS for XLSX import/export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- PDF.js for text extraction -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- Mammoth for DOCX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- ─── Top Bar ─── -->
+    <header id="topbar">
+      <div class="topbar-left">
+        <svg class="topbar-logo" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+        <h1 class="topbar-title">Aktenverzeichnis</h1>
+        <span class="topbar-badge" id="case-badge"></span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn-icon" id="btn-settings" title="Einstellungen">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ─── Settings Modal ─── -->
+    <div id="settings-modal" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Einstellungen</h2>
+          <button class="btn-icon modal-close" id="settings-close">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="field">
+            <label>KI-Anbieter</label>
+            <select id="ai-provider">
+              <option value="openai">OpenAI (GPT-4o)</option>
+              <option value="anthropic">Anthropic (Claude)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>API-Schlüssel</label>
+            <div class="input-row">
+              <input type="password" id="api-key" placeholder="sk-... oder sk-ant-..." autocomplete="off" />
+              <button class="btn-icon" id="toggle-key">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <button class="btn-primary btn-sm" id="save-settings">Speichern</button>
+          <p class="hint" id="settings-status"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Screen 1: Akte anlegen ─── -->
+    <section id="screen-new" class="screen">
+      <div class="card card-hero">
+        <div class="hero-icon">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <h2>Neue Akte anlegen</h2>
+        <p class="hint">Erstellen Sie eine neue Akte mit Aktenzeichen und Bezeichnung.</p>
+
+        <div class="field">
+          <label for="case-ref">Aktenzeichen</label>
+          <input type="text" id="case-ref" placeholder="z.B. 123/26" />
+        </div>
+        <div class="field">
+          <label for="case-title">Bezeichnung</label>
+          <input type="text" id="case-title" placeholder="z.B. Müller ./. Schmidt" />
+        </div>
+        <div class="field">
+          <label for="case-desc">Kurzbeschreibung (optional)</label>
+          <textarea id="case-desc" rows="2" placeholder="z.B. Räumungsklage, Mietrecht"></textarea>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-primary" id="btn-create-case">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Akte erstellen
+          </button>
+          <button class="btn-secondary" id="btn-import-old">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Bestehende Akte importieren
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Screen 2: Akte bearbeiten ─── -->
+    <section id="screen-case" class="screen hidden">
+
+      <!-- Drop Zone (always visible at top) -->
+      <div id="drop-zone" class="drop-zone">
+        <div class="drop-zone-inner">
+          <svg class="drop-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <span class="drop-text">Dokumente hierher ziehen oder <button class="link-btn" id="btn-browse">auswählen</button></span>
+          <span class="drop-hint">PDF, Word, Excel, Bilder</span>
+        </div>
+        <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc,.xlsx,.xls,.jpg,.jpeg,.png,.gif,.bmp,.webp,.tif,.tiff" hidden />
+      </div>
+
+      <!-- Processing indicator -->
+      <div id="processing-bar" class="processing-bar hidden">
+        <div class="processing-progress" id="processing-progress"></div>
+        <span class="processing-text" id="processing-text">Dokumente werden analysiert…</span>
+      </div>
+
+      <!-- Tab Bar -->
+      <div class="tab-bar">
+        <button class="tab active" data-tab="hauptakte">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Hauptakte
+          <span class="tab-count" id="count-hauptakte">0</span>
+        </button>
+        <button class="tab" data-tab="chronologie">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Chronologie
+          <span class="tab-count" id="count-chronologie">0</span>
+        </button>
+        <button class="tab" data-tab="personen">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Personen
+          <span class="tab-count" id="count-personen">0</span>
+        </button>
+      </div>
+
+      <!-- Tab: Hauptakte -->
+      <div class="tab-panel active" id="panel-hauptakte">
+        <div class="table-toolbar">
+          <button class="btn-sm btn-ghost" id="btn-add-row-ha">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Zeile
+          </button>
+        </div>
+        <div class="table-scroll">
+          <table id="table-hauptakte">
+            <thead>
+              <tr>
+                <th class="col-nr">#</th>
+                <th class="col-blatt">Blatt</th>
+                <th class="col-datum">Datum</th>
+                <th class="col-vorgang">Vorgang</th>
+                <th class="col-kategorie">Kategorie</th>
+                <th class="col-essentialia">Essentialia</th>
+                <th class="col-anm">Anm. Kanzlei</th>
+                <th class="col-anm">Anm. Mandant</th>
+                <th class="col-actions"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-hauptakte"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="empty-hauptakte">
+          <p>Noch keine Dokumente. Ziehen Sie Dateien in die Drop-Zone oben.</p>
+        </div>
+      </div>
+
+      <!-- Tab: Chronologie -->
+      <div class="tab-panel" id="panel-chronologie">
+        <div class="table-toolbar">
+          <button class="btn-sm btn-primary" id="btn-gen-chrono">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Chronologie generieren
+          </button>
+          <button class="btn-sm btn-ghost" id="btn-add-row-ch">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Zeile
+          </button>
+        </div>
+        <div class="table-scroll">
+          <table id="table-chronologie">
+            <thead>
+              <tr>
+                <th class="col-nr">#</th>
+                <th class="col-datum">Datum</th>
+                <th class="col-blatt">Blatt</th>
+                <th class="col-beteiligte">Beteiligte</th>
+                <th class="col-vorgang">Vorgang</th>
+                <th class="col-anm">Anm. Kanzlei</th>
+                <th class="col-anm">Anm. Mandant</th>
+                <th class="col-actions"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-chronologie"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="empty-chronologie">
+          <p>Noch keine Einträge. Klicken Sie "Chronologie generieren" nach dem Hinzufügen von Dokumenten.</p>
+        </div>
+      </div>
+
+      <!-- Tab: Personen -->
+      <div class="tab-panel" id="panel-personen">
+        <div class="table-toolbar">
+          <button class="btn-sm btn-ghost" id="btn-add-row-pe">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Person
+          </button>
+        </div>
+        <div class="table-scroll">
+          <table id="table-personen">
+            <thead>
+              <tr>
+                <th class="col-nr">#</th>
+                <th class="col-name">Name</th>
+                <th class="col-adresse">Adresse</th>
+                <th class="col-rolle">Prozessrolle</th>
+                <th class="col-blatt">Blatt</th>
+                <th class="col-anm">Anm. Kanzlei</th>
+                <th class="col-anm">Anm. Mandant</th>
+                <th class="col-actions"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-personen"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="empty-personen">
+          <p>Noch keine Personen erfasst.</p>
+        </div>
+      </div>
+
+      <!-- Bottom Action Bar -->
+      <div class="action-bar">
+        <button class="btn-secondary" id="btn-import-xlsx">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Alte Tabelle importieren
+        </button>
+        <input type="file" id="xlsx-import-input" accept=".xlsx,.xls" hidden />
+        <button class="btn-primary" id="btn-export-xlsx">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Als Excel exportieren
+        </button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
