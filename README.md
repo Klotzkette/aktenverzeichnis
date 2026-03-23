@@ -76,10 +76,10 @@ Adaptiert vom PDF-Pseudonymizer: Soft blue-teal Palette, Swiss-style Minimalismu
 
 ## Urheberrecht / Copyright
 
-© 2026 Tom Braegel. Alle Rechte vorbehalten.
+© 2026 Tom Braegelmann. Alle Rechte vorbehalten.
 
 Diese Software und alle zugehörigen Dateien sind urheberrechtlich geschützt. Es wird keinerlei Lizenz — weder ausdrücklich noch stillschweigend — gewährt. Jede Nutzung, Vervielfältigung, Verbreitung oder Bearbeitung bedarf der ausdrücklichen schriftlichen Genehmigung des Urhebers.
 
-© 2026 Tom Braegel. All rights reserved.
+© 2026 Tom Braegelmann. All rights reserved.
 
 This software and all associated files are protected by copyright. No license — express or implied — is granted. Any use, reproduction, distribution, or modification requires the explicit written permission of the copyright holder.
