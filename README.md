@@ -81,9 +81,3 @@ Adaptiert vom PDF-Pseudonymizer: Soft blue-teal Palette, Swiss-style Minimalismu
 Diese Software und alle zugehörigen Dateien sind urheberrechtlich geschützt. Es wird keinerlei Lizenz — weder ausdrücklich noch stillschweigend — gewährt. Jede Nutzung, Vervielfältigung, Verbreitung oder Bearbeitung bedarf der ausdrücklichen schriftlichen Genehmigung des Urhebers.
 
 © 2026 Tom Braegelmann. All rights reserved.
-
-
-## Co-Autor
-
-Dieses Projekt wurde gemeinsam mit [Claude](https://www.anthropic.com/claude) (Anthropic) als KI-Assistenten entwickelt.
-
