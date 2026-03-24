@@ -11,7 +11,7 @@ Ein webbasiertes Tool für Kanzleien zur digitalen Aktenführung. Dokumente per 
 - **Nachträgliches Hinzufügen**: Neue Dokumente jederzeit reinwerfen — die Tabelle wird ergänzt
 - **Alte Tabelle importieren**: Bestehende XLSX-Aktenverzeichnisse einlesen und weiterführen
 - **Excel-Export**: Formatierte XLSX mit 4 Blättern (Vorblatt, Aktenübersicht, Chronologie, Personenübersicht)
-- **Wahlweise OpenAI (GPT-4o) oder Anthropic (Claude)** mit eigenem API-Key
+- **Wahlweise OpenAI (GPT-4o) oder Anthropic)** mit eigenem API-Key
 
 ## Funktionaler Ablauf
 
