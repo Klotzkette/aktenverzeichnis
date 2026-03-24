@@ -82,4 +82,8 @@ Diese Software und alle zugehörigen Dateien sind urheberrechtlich geschützt. E
 
 © 2026 Tom Braegelmann. All rights reserved.
 
+
+## Co-Autor
+
+Dieses Projekt wurde gemeinsam mit [Claude](https://www.anthropic.com/claude) (Anthropic) als KI-Assistenten entwickelt.
 This software and all associated files are protected by copyright. No license — express or implied — is granted. Any use, reproduction, distribution, or modification requires the explicit written permission of the copyright holder.
